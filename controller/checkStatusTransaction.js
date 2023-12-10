@@ -18,8 +18,8 @@ const CheckStatusTransaction = (req, res) => {
     })
     .catch((error) => {
       return res
-        .status(400)
-        .send({ message: error.message, status: error.httpStatusCode });
+        .status(Number(error.httpStatusCode))
+        .send({ message: error.message, status: Number(error.httpStatusCode) });
     });
 };
 
