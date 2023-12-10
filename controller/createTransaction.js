@@ -1,28 +1,45 @@
-import snap from "../middleware/snapMidtrans";
+import { validationResult } from "express-validator";
+import snap from "../utils/snapMidtrans.js";
 
 const PostCreateTransaction = (req, res) => {
-  const { order_id, ammount, first_name, last_name, email, phone } = req.body;
+  const errors = validationResult(req);
 
-  if (order_id === "") {
-    return res.status(400).send({ message: "order_id is required" });
-  } else if (ammount === 0) {
-    return res.status(400).send({ message: "ammount value cant 0" });
-  } else if (typeof ammount === "string") {
-    return res.status(400).send({ message: "ammount type must be number" });
-  } else if (typeof order_id !== "string") {
-    return res.status(400).send({ message: "order_id type must be string" });
+  if (!errors.isEmpty()) {
+    res.status(422).json({ errors: errors.array() });
+    return;
   }
+
+  const { order_id, ammount, first_name, last_name, email, phone, items } =
+    req.body;
 
   const parameters = {
     transaction_details: {
       order_id: order_id,
       gross_amount: ammount,
     },
+    item_details: items,
+    customer_details: {
+      first_name: first_name,
+      last_name: last_name,
+      email: email,
+      phone: phone,
+    },
+    expiry: {
+      unit: "hour",
+      duration: 8,
+    },
   };
 
-  snap.createTransaction(parameters).then((transaction) => {
-    return res.status(200).send(transaction);
-  });
+  snap
+    .createTransaction(parameters)
+    .then((transaction) => {
+      return res.status(200).send(transaction);
+    })
+    .catch((error) => {
+      return res
+        .status(400)
+        .send({ message: error.message, status: error.httpStatusCode });
+    });
 };
 
 export default PostCreateTransaction;
