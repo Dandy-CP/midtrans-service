@@ -1,4 +1,4 @@
-import { body } from "express-validator";
+import { body, query } from "express-validator";
 
 const validateTransaction = (method) => {
   switch (method) {
@@ -47,6 +47,20 @@ const validateTransaction = (method) => {
         body("items.*.name", "items name is required").exists(),
         body("items.*.name", "items name is required").notEmpty(),
         body("items.*.name", "items must be string").isString(),
+      ];
+    }
+
+    case "refundTransaction": {
+      return [
+        query("order_id").notEmpty(),
+
+        body("ammount", "ammount is Required").exists(),
+        body("ammount", "ammount is Required").notEmpty(),
+        body("ammount", "ammount must be number integer").isInt(),
+
+        body("reason", "reason is Required").exists(),
+        body("reason", "reason is Required").notEmpty(),
+        body("reason", "reason must be string").isString(),
       ];
     }
   }
